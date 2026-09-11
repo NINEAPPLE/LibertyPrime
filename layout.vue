@@ -1,9 +1,9 @@
 <template>
     <div class="Liberty" :style="skinConfig">
         <div id="top"></div>
-        <div class="nav-wrapper" :class="{ 'navbar-fixed-top': $store.state.localConfig['liberty.fixed_navbar'] === true }">
+        <div class="nav-wrapper" :class="{ 'navbar-fixed-top': $store.state.localConfig['liberty-prime.fixed_navbar'] === true }">
             <nav class="navbar navbar-dark">
-                <nuxt-link class="navbar-brand" to="/">{{ $store.state.config['skin.liberty.navbar_logo_text'] }}</nuxt-link>
+                <nuxt-link class="navbar-brand" to="/">{{ libertyConfig('navbar_logo_text') ?? $store.state.config['logo_text'] }}</nuxt-link>
                 <ul class="nav navbar-nav">
                     <li class="nav-item">
                         <nuxt-link class="nav-link" to="/RecentChanges"><span class="fa fa-refresh"></span><span class="hide-title">최근 변경</span></nuxt-link>
@@ -37,6 +37,7 @@
                                 <template v-if="$store.state.session.menus.length">
                                     <div class="dropdown-divider"></div>
                                     <nuxt-link v-for="m in $store.state.session.menus" :key="m.l" :to="m.l" class="dropdown-item">{{ m.t }}</nuxt-link>
+                                    <nuxt-link v-if="$store.state.session.menus.some(item => item.l === '/admin/developer') && ! $store.state.session.menus.some(item => item.l === '/admin/initial_setup')" class="dropdown-item" to="/admin/initial_setup">초기 설정</nuxt-link>
                                 </template>
                             </div>
                         </dropdown>
@@ -57,6 +58,26 @@
                             <div v-else-if="$store.state.session.account.type === 0" class="username dropdown-item">
                                 <b>{{ $store.state.session.account.name }}</b><br>Please login!
                             </div>
+                            <template v-if="$store.state.session.account.type === 1">
+                                <nuxt-link
+                                    v-for="n in $store.state.session.otherAccounts"
+                                    :key="n.uuid"
+                                    :to="`/member/switch_account/${n.uuid}`"
+                                    class="dropdown-item switch-account-item"
+                                >
+                                    <img :src="n.gravatar_url" class="switch-account-image" />
+                                    <span class="switch-account-name">{{ n.name }}</span>
+                                    <button
+                                        type="button"
+                                        class="switch-account-logout"
+                                        @click.prevent="logoutOther(n.uuid)"
+                                        :aria-label="`로그아웃 ${n.name}`"
+                                    >
+                                        <span class="fa-solid fa-x" />
+                                    </button>
+                                </nuxt-link>
+                                <nuxt-link to="/member/login" class="dropdown-item">계정 추가</nuxt-link>
+                            </template>
                             <div class="dropdown-divider"></div>
                             <a href="#" class="dropdown-item" @click.prevent="openSettingModal">설정</a>
                             <a v-if="$store.state.currentTheme === 'light'" href="#" class="dropdown-item" @click.prevent="$store.commit('localConfigSetValue', {key: 'wiki.theme', value: 'dark'})">다크 테마로</a>
@@ -79,12 +100,47 @@
                         </div>
                     </dropdown>
                 </div>
+                <div class="nav-link navbar-notification">
+                    <dropdown class="liberty-notification-menu">
+                        <template #toggle>
+                            <a class="nav-link dropdown-toggle liberty-notification-toggle" href="#" @click.prevent>
+                                <span class="fa fa-bell"></span>
+                                <span v-if="notifications.length" class="liberty-notification-count">{{ notificationCountLabel }}</span>
+                            </a>
+                        </template>
+                        <div class="dropdown-menu dropdown-menu-right liberty-notification-dropdown" role="menu">
+                            <div class="liberty-notification-header">
+                                <strong>알림</strong>
+                                <div class="liberty-notification-actions">
+                                    <a v-if="notifications.length" href="#" class="liberty-notification-action" @click.prevent="markAllNotificationsRead">모두 읽기</a>
+                                    <nuxt-link to="/member/notifications" class="liberty-notification-action">자세히</nuxt-link>
+                                </div>
+                            </div>
+                            <div v-if="!notifications.length" class="liberty-notification-empty">새로운 알림이 없습니다.</div>
+                            <nuxt-link
+                                v-for="item in notificationPreviewItems"
+                                :key="item.uuid || `${item.type}-${item.createdAt}`"
+                                :to="notificationLink(item)"
+                                class="dropdown-item liberty-notification-item"
+                                :class="{ 'is-read': item.read }"
+                            >
+                                <span class="liberty-notification-item-icon" :class="`type-${item.type}`">
+                                    <span :class="notificationTypeIcon(item.type)"></span>
+                                </span>
+                                <span class="liberty-notification-item-content">
+                                    <span class="liberty-notification-item-title">{{ notificationTitle(item) }}</span>
+                                    <span v-if="notificationDetail(item)" class="liberty-notification-item-detail">{{ notificationDetail(item) }}</span>
+                                </span>
+                            </nuxt-link>
+                        </div>
+                    </dropdown>
+                </div>
                 <search-form />
             </nav>
         </div>
-        <div class="content-wrapper" :class="{ 'hide-sidebar': $store.state.localConfig['liberty.sidebar'] === 'hide' || $store.state.localConfig['liberty.sidebar'] === 'footer' }">
+        <div class="content-wrapper" :class="{ 'hide-sidebar': $store.state.localConfig['liberty-prime.sidebar'] === 'hide' || $store.state.localConfig['liberty-prime.sidebar'] === 'footer' }">
             <div class="liberty-sidebar">
-                <div class="liberty-right-fixed" :class="{ 'fixed': $store.state.localConfig['liberty.sidebar'] === 'fix' }">
+                <div class="liberty-right-fixed" :class="{ 'fixed': $store.state.localConfig['liberty-prime.sidebar'] === 'fix' }">
                     <div class="live-recent">
                         <div class="live-recent-header">
                             <ul class="nav nav-tabs">
@@ -101,8 +157,8 @@
                 </div>
             </div>
             <div class="container-fluid liberty-content">
-                <div v-if="$store.state.config['wiki.sitenotice']" id="site-notice" class="notification">
-                    <span class="label" v-html="$store.state.config['wiki.sitenotice']" @click="onDynamicContentClick($event)" />
+                <div v-if="libertyConfig('wiki.sitenotice')" id="site-notice" class="notification">
+                    <span class="label" v-html="libertyConfig('wiki.sitenotice')" @click="onDynamicContentClick($event)" />
                 </div>
                 <div class="liberty-content-header">
                     <content-tool @onClickEditBtn="showEditMessage" />
@@ -146,7 +202,7 @@
                     </alert>
                     <nuxt />
                     <div v-if="$store.state.page.viewName === 'license'">
-                        <h2>Liberty skin license</h2>
+                        <LicensePage />
                         <pre>{{ License }}</pre>
                     </div>
                     <div class="clearfix"></div>
@@ -157,14 +213,14 @@
                         <li v-else class="footer-info-lastmod">이 문서는 <local-date :date="$store.state.page.data.date" />에 마지막으로 편집되었습니다.</li>
                         <li class="footer-info-copyright" v-html="$store.state.page.data.copyright_text" />
                     </ul>
-                    <ul class="footer-places" @click="onDynamicContentClick($event)" v-html="$store.state.config['skin.liberty.footer_html'] || $store.state.config['wiki.footer_text']" />
+                    <ul class="footer-places" @click="onDynamicContentClick($event)" v-html="libertyConfig('footer_html') || libertyConfig('wiki.footer_text')" />
                     <ul class="footer-icons">
                         <li class="footer-poweredbyico">
-                            <a href="//github.com/wjdgustn/thetree-skin-liberty" target="_blank">Liberty</a> | <a href="//github.com/wjdgustn/thetree" target="_blank">the tree</a>
+                            <a href="//github.com/NINEAPPLE/LibertyPrime" target="_blank">LibertyPrime</a> | <a href="//github.com/wjdgustn/thetree" target="_blank">the tree</a>
                         </li>
                     </ul>
                 </div>
-                <div v-if="$store.state.localConfig['liberty.sidebar'] === 'footer'" class="footer-recent">
+                <div v-if="$store.state.localConfig['liberty-prime.sidebar'] === 'footer'" class="footer-recent">
                     <recent-card :limit="8" />
                     <div class="live-recent-footer">
                         <nuxt-link to="/RecentChanges" title="최근 변경내역"><span class="label label-info">더 보기</span></nuxt-link>
@@ -182,6 +238,7 @@
 
 <style>
 @import "./css/bootstrap.min.css";
+@import "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css";
 @import "./css/font-awesome.min.css";
 @import "./css/font/Noto Sans KR.css";
 @import "./css/default.css";
@@ -197,6 +254,7 @@ import LocalDate from '~/components/localDate';
 import RecentCard from './layouts/recentCard';
 import SearchForm from './layouts/searchForm';
 import ContentTool from './layouts/contentTool';
+import LicensePage from './layouts/license';
 import Dropdown from './components/dropdown';
 import SettingModal from './components/settingModal';
 import License from "raw-loader!./LICENSE";
@@ -209,6 +267,7 @@ export default {
         LocalDate,
         RecentCard,
         SearchForm,
+        LicensePage,
         Dropdown,
         ContentTool
     },
@@ -230,29 +289,39 @@ export default {
     },
     computed: {
         brand_color() {
-            return this.selectByTheme(this.$store.state.config['skin.liberty.brand_color_1'] ?? '#4188f1', '#2d2f34');
+            return this.selectByTheme(this.libertyConfig('brand_color_1') ?? this.libertyConfig('theme_color') ?? '#4188f1', '#2d2f34');
         },
         skinConfig() {
             return {
                 '--liberty-brand-color': this.brand_color,
-                '--liberty-brand-dark-color': this.selectByTheme(this.$store.state.config['skin.liberty.brand_dark_color_1'] ?? this.darkenColor(this.brand_color), '#16171a'),
-                '--liberty-brand-bright-color': this.selectByTheme(this.$store.state.config['skin.liberty.brand_bright_color_1'] ?? this.lightenColor(this.brand_color), '#383b40'),
-                '--liberty-navbar-logo-image': this.$store.state.config['skin.liberty.navbar_logo_image'] || (this.$store.state.config['wiki.logo_url'] && `url(${this.$store.state.config['wiki.logo_url']})`),
-                '--liberty-navbar-logo-minimum-width': this.$store.state.config['skin.liberty.navbar_logo_minimum_width'],
-                '--liberty-navbar-logo-width': this.$store.state.config['skin.liberty.navbar_logo_width'],
-                '--liberty-navbar-logo-size': this.$store.state.config['skin.liberty.navbar_logo_size'],
-                '--liberty-navbar-logo-padding': this.$store.state.config['skin.liberty.navbar_logo_padding'],
-                '--liberty-navbar-logo-margin': this.$store.state.config['skin.liberty.navbar_logo_margin'],
+                '--liberty-brand-dark-color': this.selectByTheme(this.libertyConfig('brand_dark_color_1') ?? this.darkenColor(this.brand_color), '#16171a'),
+                '--liberty-brand-bright-color': this.selectByTheme(this.libertyConfig('brand_bright_color_1') ?? this.lightenColor(this.brand_color), '#383b40'),
+                '--liberty-navbar-logo-image': this.libertyConfig('navbar_logo_image') || (this.libertyConfig('wiki.logo_url') && `url(${this.libertyConfig('wiki.logo_url')})`),
+                '--liberty-navbar-logo-minimum-width': this.libertyConfig('navbar_logo_minimum_width'),
+                '--liberty-navbar-logo-width': this.libertyConfig('navbar_logo_width'),
+                '--liberty-navbar-logo-size': this.libertyConfig('navbar_logo_size'),
+                '--liberty-navbar-logo-padding': this.libertyConfig('navbar_logo_padding'),
+                '--liberty-navbar-logo-margin': this.libertyConfig('navbar_logo_margin'),
                 '--brand-color-1': 'var(--liberty-brand-color)',
-                '--brand-color-2': this.selectByTheme(this.$store.state.config['skin.liberty.brand_color_2'] ?? 'var(--liberty-brand-color)', 'var(--liberty-brand-color)'),
+                '--brand-color-2': this.selectByTheme(this.libertyConfig('brand_color_2') ?? 'var(--liberty-brand-color)', 'var(--liberty-brand-color)'),
                 '--brand-bright-color-1': 'var(--liberty-brand-bright-color)',
-                '--brand-bright-color-2': this.selectByTheme(this.$store.state.config['skin.liberty.brand_bright_color_2'] ?? 'var(--liberty-brand-bright-color)', 'var(--liberty-brand-bright-color)'),
+                '--brand-bright-color-2': this.selectByTheme(this.libertyConfig('brand_bright_color_2') ?? 'var(--liberty-brand-bright-color)', 'var(--liberty-brand-bright-color)'),
                 '--text-color': this.selectByTheme('#373a3c', '#ddd'),
                 '--article-background-color': this.selectByTheme('#fff', '#000'),
             };
         },
         requestable() {
             return this.$store.state.page.data.editable === true && this.$store.state.page.data.edit_acl_message && this.$store.state.page.viewName !== 'notfound';
+        },
+        notifications() {
+            return Array.isArray(this.$store.state.session.notifications) ? this.$store.state.session.notifications : [];
+        },
+        notificationPreviewItems() {
+            return this.notifications.slice(0, 8);
+        },
+        notificationCountLabel() {
+            if (this.notifications.length > 99) return '99+';
+            return String(this.notifications.length);
         }
     },
     methods: {
@@ -286,12 +355,102 @@ export default {
 
             return "#" + ((r < 16 ? "0" : "") + r.toString(16)) + ((g < 16 ? "0" : "") + g.toString(16)) + ((b < 16 ? "0" : "") + b.toString(16));
         },
+        libertyConfig(key) {
+            if (key.startsWith('wiki.')) {
+                return this.$store.state.config[key];
+            }
+            return this.$store.state.config[`skin.${__THETREE_SKIN_NAME__}.${key}`];
+        },
+        notificationLink(item) {
+            return (item && item.url) || '/member/notifications';
+        },
+        notificationTypeIcon(type) {
+            return ({
+                0: 'fa fa-comments',
+                1: 'fa fa-at',
+                2: 'fa fa-bullhorn',
+                3: 'fa fa-bell'
+            })[type] || 'fa fa-bell';
+        },
+        notificationTitle(item) {
+            const username = item && item.comment && item.comment.user && item.comment.user.name;
+            const thread = item && item.thread && item.thread.topic;
+            const commentId = item && item.comment && item.comment.id;
+
+            if (item && item.type === 0) {
+                const by = username ? `${username} 사용자가 ` : '';
+                const topic = thread ? `${thread}` : '토론';
+                return `${by}${topic}${commentId ? ` #${commentId}` : ''} 사용자 토론 댓글 작성`;
+            }
+
+            if (item && item.type === 1) {
+                const by = username ? `${username} 사용자가 ` : '';
+                const topic = thread ? `${thread}` : '토론';
+                return `${by}${topic}${commentId ? ` #${commentId}` : ''} 댓글에서 호출`;
+            }
+
+            if (item && item.type === 2) {
+                return '운영 공지';
+            }
+
+            if (item && item.type === 3) {
+                return '알림';
+            }
+
+            return '새 알림';
+        },
+        notificationDetail(item) {
+            if (!item) return '';
+
+            if (item.type === 2 || item.type === 3) {
+                return this.stripHtml(item.data);
+            }
+
+            if (item.comment && item.comment.contentHtml) {
+                return this.stripHtml(item.comment.contentHtml);
+            }
+
+            if (item.document) {
+                return this.doc_fulltitle(item.document);
+            }
+
+            return '';
+        },
+        stripHtml(raw) {
+            if (!raw) return '';
+            return String(raw).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        },
+        async markAllNotificationsRead() {
+            if (!this.notifications.length) return;
+
+            await this.internalRequestAndProcess('/member/notifications/read', {
+                method: 'POST'
+            });
+
+            this.$store.state.session.notifications = [];
+        },
         selectByTheme(light, dark) {
             return this.$store.state.currentTheme === 'dark' ? dark : light;
         },
         openSettingModal() {
             this.$vfm.show({ component: SettingModal });
-        }
+        },
+        async logoutOther(uuid) {
+            if (!uuid) return;
+
+            try {
+                await this.internalRequestAndProcess(`/member/logout_other/${uuid}`, {
+                    method: 'POST'
+                });
+            } catch (err) {
+                console.error('logoutOther failed', err);
+            } finally {
+                // Ensure UI updates to reflect session changes
+                if (typeof window !== 'undefined') {
+                    window.location.reload();
+                }
+            }
+        },
     }
 }
 </script>

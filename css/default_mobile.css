@@ -128,6 +128,10 @@
         margin: 0 0.25rem;
     }
 
+    /* .Liberty .nav-wrapper .navbar .liberty-notification-dropdown {
+        width: min(360px, calc(100vw - 12px));
+    } */
+
     .Liberty .nav-wrapper .navbar .navbar-nav .nav-item .nav-link .hide-title {
         display: none;
     }
@@ -170,7 +174,7 @@
 }
 
 /* Max-width: 397px 대형폰 이하 시작 부분 */
-@media (max-width: 397px) {
+@media (max-width: 415px) {
     .Liberty .nav-wrapper .navbar .navbar-brand {
         width: var(--liberty-navbar-logo-minimum-width, 5rem);
         /* 모바일에서 Libre 로고 나타내는 거 수정 */
@@ -195,5 +199,18 @@
 
     .Liberty .nav-wrapper .navbar .form-inline {
         padding-top: 0.04rem;
+    }
+
+    .Liberty .nav-wrapper .navbar .navbar-notification {
+        margin-right: 2px;
+    }
+
+    .Liberty .nav-wrapper .navbar .liberty-notification-dropdown {
+        position: fixed;
+        min-width: 100vw;
+        top: 78px;
+        left: 0;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
     }
 }

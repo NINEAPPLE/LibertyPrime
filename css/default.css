@@ -165,7 +165,7 @@ del, s, strike {
     font-size: 1rem;
 }
 
-.Liberty .nav-wrapper .navbar .navbar-nav .nav-item .nav-link {
+.Liberty .nav-wrapper .navbar .nav-link {
     color: #fff;
     font-size: 1rem;
     padding: 0.7rem 0.8rem;
@@ -320,6 +320,204 @@ del, s, strike {
 .Liberty .nav-wrapper .navbar .navbar-login .login-dropdown-menu .username:hover {
     background-color: transparent;
     color: #373a3c;
+}
+
+.Liberty .nav-wrapper .navbar .navbar-notification {
+    display: flex;
+    align-items: center;
+    margin: 0 -.3rem 0 .5rem;
+    padding: 0;
+    float: right;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-menu {
+    position: relative;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-toggle {
+    position: relative;
+    /* min-width: 42px; */
+    text-align: center;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-toggle:hover {
+	background-color: var(--liberty-brand-dark-color, #214479);
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-toggle:hover,
+.Liberty .nav-wrapper .navbar .liberty-notification-toggle:focus {
+    transition: 0.3s;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-toggle::after {
+    display: none;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-toggle .fa-bell {
+    margin-left: 2px;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-count {
+    position: absolute;
+    top: 4px;
+    right: 0;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 10px;
+    background: #d9534f;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 18px;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-dropdown {
+    width: 360px;
+    max-width: calc(100vw - 24px);
+    padding: 0;
+    overflow: hidden;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-header strong {
+    font-size: 16px;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-action {
+    font-size: 12px;
+    color: #5f6368;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-empty {
+    padding: 18px 14px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    white-space: normal;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-item.is-read {
+    opacity: 0.72;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-item-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    color: #fff;
+    background: #8a8d91;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-item-icon.type-0 {
+    background: #4c8fd8;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-item-icon.type-1 {
+    background: #8e68d9;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-item-icon.type-2 {
+    background: #d9534f;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-item-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-item-title {
+    color: #1f2328;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.Liberty .nav-wrapper .navbar .liberty-notification-item-detail {
+    color: #5f6368;
+    font-size: 12px;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.Liberty .nav-wrapper .navbar .navbar-login .login-dropdown-menu .switch-account-item {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: 0 20px;
+    height: 27.38px;
+}
+
+.Liberty .nav-wrapper .navbar .navbar-login .login-dropdown-menu img.switch-account-image {
+    --size: 1.5rem;
+    width: var(--size);
+    height: var(--size);
+    border-radius: .3rem;
+}
+
+.Liberty .nav-wrapper .navbar .navbar-login .login-dropdown-menu .switch-account-name {
+    flex: 1;
+}
+
+.Liberty .nav-wrapper .navbar .navbar-login .login-dropdown-menu .switch-account-logout {
+    margin-right: -.4rem;
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    height: calc(100% - 3px);
+    line-height: 1;
+}
+
+.Liberty .nav-wrapper .navbar .navbar-login .login-dropdown-menu .switch-account-logout:hover {
+    background: #c14b4b;
+    color: #fff;
+}
+
+/* .Liberty .nav-wrapper .navbar .navbar-login .login-dropdown-menu .switch-account-logout:hover,
+.Liberty .nav-wrapper .navbar .navbar-login .login-dropdown-menu .switch-account-logout:focus {
+    transition: .3s
+} */
+
+.Liberty .nav-wrapper .navbar .navbar-login .login-dropdown-menu .switch-account-logout .fa-x {
+    width: inherit;
+    height: inherit;
+    display: inline-flex;
+    align-items: center;
+    margin: 0 -2px;
 }
 /* 네비 수정 End */
 

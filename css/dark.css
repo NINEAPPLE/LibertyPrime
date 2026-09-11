@@ -151,3 +151,29 @@ body.theseed-dark-mode {
 .theseed-dark-mode div#bottom a {
 	color: #E69720;
 }
+
+.theseed-dark-mode .Liberty .nav-wrapper .navbar .liberty-notification-dropdown {
+	background: #16171A;
+}
+
+.theseed-dark-mode .Liberty .nav-wrapper .navbar .liberty-notification-header {
+	border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+.theseed-dark-mode .Liberty .nav-wrapper .navbar .liberty-notification-header strong,
+.theseed-dark-mode .Liberty .nav-wrapper .navbar .liberty-notification-action,
+.theseed-dark-mode .Liberty .nav-wrapper .navbar .liberty-notification-empty {
+	color: #bfc3c8;
+}
+
+.theseed-dark-mode .Liberty .nav-wrapper .navbar .liberty-notification-item {
+	border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.theseed-dark-mode .Liberty .nav-wrapper .navbar .liberty-notification-item-title {
+	color: #f0f3f6;
+}
+
+.theseed-dark-mode .Liberty .nav-wrapper .navbar .liberty-notification-item-detail {
+	color: #bfc3c8;
+}
