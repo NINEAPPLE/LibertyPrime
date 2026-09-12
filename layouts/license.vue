@@ -1,5 +1,5 @@
 <script setup>
-const Version = 'v1.0.0-beta';
+const Version = 'v1.0.0';
 
 
 import { ref } from 'vue';

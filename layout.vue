@@ -52,13 +52,17 @@
                             </a>
                         </template>
                         <div class="dropdown-menu dropdown-menu-right login-dropdown-menu">
-                            <div v-if="$store.state.session.account.type === 1" class="username dropdown-item">
-                                <b>{{ $store.state.session.account.name }}</b><br>Member
-                            </div>
-                            <div v-else-if="$store.state.session.account.type === 0" class="username dropdown-item">
-                                <b>{{ $store.state.session.account.name }}</b><br>Please login!
+                            <div class="username dropdown-item">
+                                <b>{{ $store.state.session.account.name }}</b><br>
+                                <template v-if="$store.state.session.account.type === 1">
+                                    <template v-if="$store.state.session.menus.some(item => item.l === '/admin/developer')">Developer</template>
+                                    <template v-else-if="$store.state.session.menus.some(item => item.l === '/aclgrouop')">Administrator</template>
+                                    <template v-else>Member</template>
+                                </template>
+                                <template v-else-if="$store.state.session.account.type === 0">Please login!</template>
                             </div>
                             <template v-if="$store.state.session.account.type === 1">
+                                <div class="dropdown-divider" />
                                 <nuxt-link
                                     v-for="n in $store.state.session.otherAccounts"
                                     :key="n.uuid"
